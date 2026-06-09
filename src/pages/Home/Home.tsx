@@ -12,7 +12,7 @@ export function Home() {
           alt="Logo N2 Sistemas"
           className={styles.logo}
         />
-
+        
         <h1>Comece por aqui!</h1>
 
         <p className={styles.subtitle}>
