@@ -1,0 +1,34 @@
+.card {
+  height: 160px;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background-color: transparent;
+
+  padding: 28px 20px;
+
+  transition: 0.2s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  border-color: #2563eb;
+  background-color: #ffffff;
+}
+
+.active {
+  border-color: #9bbcff;
+  background-color: #f8fbff;
+}
+
+.card h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #222222;
+  margin-bottom: 12px;
+}
+
+.card p {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #555555;
+}
