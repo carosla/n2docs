@@ -85,3 +85,8 @@
 .submenu li:hover {
   color: #2563eb;
 }
+
+.activeSub {
+  color: #2563eb !important;
+  font-weight: 600;
+}

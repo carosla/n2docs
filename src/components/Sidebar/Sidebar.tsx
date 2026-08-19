@@ -2,18 +2,26 @@ import { useState } from 'react';
 import styles from './Sidebar.module.css';
 import { BookOpen } from 'lucide-react';
 
+type SidebarProps = {
+  selectedCategory: string;
+  selectedSub: string | null;
+  onSelectCategory: (cat: string) => void;
+  onSelectSub: (sub: string) => void;
+};
+
 const categories = [
   'Todos os manuais',
   'Cadastros',
-  'Financeiro',
-  'Fiscal',
   'Estoque',
-  'Produção',
   'Compras',
   'Vendas',
-  'Gráfica',
-  'CRM',
+  'Faturamento',
+  'Financeiro',
   'Bancos/Cofre',
+  'Gráfica',
+  'Química',
+  'Produção',
+  'CRM'
 ];
 
 const cadastros = [
@@ -23,7 +31,7 @@ const cadastros = [
   'Financeiros',
   'Comerciais',
   'Estoque',
-  'EPI'
+  'EPI',
 ];
 
 const reports = [
@@ -36,45 +44,104 @@ const reports = [
   'Financeiro',
 ];
 
-export function Sidebar() {
-
+export function Sidebar({
+  selectedCategory,
+  selectedSub,
+  onSelectCategory,
+  onSelectSub,
+}: SidebarProps) {
   const [cadastrosOpen, setCadastrosOpen] = useState(false);
+
+  // Clique em uma categoria normal
+  const handleCategoryClick = (category: string) => {
+    // Fecha o menu de Cadastros ao escolher
+    // qualquer outra categoria.
+    setCadastrosOpen(false);
+
+    // Seleciona a categoria.
+    // O componente Manuals vai limpar a subcategoria.
+    onSelectCategory(category);
+  };
+
+  // Clique em Cadastros
+  const handleCadastrosClick = () => {
+    setCadastrosOpen((previous) => !previous);
+
+    onSelectCategory('Cadastros');
+  };
+
+  // Clique em uma subcategoria
+  const handleSubClick = (sub: string) => {
+    // Garante que subcategoria só funcione
+    // quando Cadastros estiver selecionado.
+    if (selectedCategory !== 'Cadastros') {
+      return;
+    }
+
+    onSelectSub(sub);
+  };
 
   return (
     <aside className={styles.sidebar}>
       <div className={styles.group}>
-        <h2>Categorias</h2>
+        <h2>CATEGORIAS</h2>
 
         <ul>
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <li
               key={category}
-              className={index === 0 ? styles.active : ''}
+              className={
+                selectedCategory === category &&
+                !selectedSub
+                  ? styles.active
+                  : ''
+              }
             >
-              {index === 0 && <BookOpen size={14} />}
+              {selectedCategory === category &&
+                !selectedSub && (
+                  <BookOpen size={14} />
+                )}
 
               {category === 'Cadastros' ? (
                 <>
                   <button
                     type="button"
                     className={styles.dropdownButton}
-                    onClick={() => setCadastrosOpen(!cadastrosOpen)}
+                    onClick={handleCadastrosClick}
                   >
-                    Cadastros {cadastrosOpen ? '▾' : '▸'}
+                    Cadastros{' '}
+                    {cadastrosOpen ? '▾' : '▸'}
                   </button>
 
                   {cadastrosOpen && (
                     <ul className={styles.submenu}>
-                      {cadastros.map((cadastro) => (
-                        <li key={cadastro}>
-                          {cadastro}
+                      {cadastros.map((sub) => (
+                        <li
+                          key={sub}
+                          className={
+                            selectedCategory === 'Cadastros' &&
+                            selectedSub === sub
+                              ? styles.activeSub
+                              : ''
+                          }
+                          onClick={() =>
+                            handleSubClick(sub)
+                          }
+                        >
+                          {sub}
                         </li>
                       ))}
                     </ul>
                   )}
                 </>
               ) : (
-                <span>{category}</span>
+                <span
+                  onClick={() =>
+                    handleCategoryClick(category)
+                  }
+                >
+                  {category}
+                </span>
               )}
             </li>
           ))}
@@ -82,11 +149,26 @@ export function Sidebar() {
       </div>
 
       <div className={styles.group}>
-        <h2>Relatórios</h2>
+        <h2>RELATÓRIOS</h2>
 
         <ul>
           {reports.map((report) => (
-            <li key={report}>
+            <li
+              key={report}
+              className={
+                selectedCategory === `Rel-${report}`
+                  ? styles.active
+                  : ''
+              }
+              onClick={() => {
+                // Fecha o menu de Cadastros
+                // ao entrar em Relatórios.
+                setCadastrosOpen(false);
+
+                // Seleciona o relatório.
+                onSelectCategory(`Rel-${report}`);
+              }}
+            >
               <span>{report}</span>
             </li>
           ))}
