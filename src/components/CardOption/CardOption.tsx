@@ -4,11 +4,20 @@ type CardOptionProps = {
   icon: React.ReactNode;
   title: string;
   description: string;
+  onClick?: () => void;
 };
 
-export function CardOption({ icon, title, description }: CardOptionProps) {
+export function CardOption({
+  icon,
+  title,
+  description,
+  onClick,
+}: CardOptionProps) {
   return (
-    <div className={styles.card}>
+    <div
+      className={styles.card}
+      onClick={onClick}
+    >
       <div className={styles.icon}>{icon}</div>
 
       <h3>{title}</h3>

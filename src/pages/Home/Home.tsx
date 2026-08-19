@@ -2,8 +2,11 @@ import styles from './Home.module.css';
 import logoN2 from '../../assets/logo-n2.png';
 import { CardOption } from '../../components/CardOption/CardOption';
 import { Rocket, LayoutGrid, FileSearch } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function Home() {
+  const navigate = useNavigate();
+
   return (
     <main className={styles.container}>
       <section className={styles.content}>
@@ -27,18 +30,21 @@ export function Home() {
             icon={<Rocket />}
             title="Primeiros Passos"
             description="Cadastros iniciais, configurações básicas e orientações para começar a utilizar o sistema."
+            onClick={() => navigate('/manuais')}
           />
 
           <CardOption
             icon={<LayoutGrid />}
             title="Módulos do Sistema"
             description="Acesse manuais separados por áreas, como vendas, estoque, financeiro, fiscal e produção."
+            onClick={() => navigate('/manuais')}
           />
 
           <CardOption
             icon={<FileSearch />}
             title="Relatórios e Consultas"
             description="Aprenda a consultar informações, emitir relatórios e acompanhar os resultados da empresa."
+            onClick={() => navigate('/manuais')}
           />
         </div>
       </section>
