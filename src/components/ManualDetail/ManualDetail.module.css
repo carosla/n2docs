@@ -1,0 +1,152 @@
+.wrapper {
+  max-width: 680px;
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 24px;
+
+  font-family: inherit;
+  font-size: 13px;
+  color: #777777;
+  cursor: pointer;
+}
+
+.breadcrumb:hover {
+  color: #2563eb;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.iconBox {
+  width: 42px;
+  height: 42px;
+  background-color: #eff6ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.badge {
+  font-size: 11px;
+  color: #888888;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 99px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.description {
+  font-size: 13px;
+  color: #777777;
+  line-height: 1.5;
+}
+
+/* ── Preview box ── */
+.previewBox {
+  width: 100%;
+  height: 110px;
+  background-color: #e8e8e8;
+  border-radius: 8px;
+  margin-bottom: 28px;
+}
+
+/* ── Steps ── */
+.steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+.stepNumber {
+  width: 22px;
+  height: 22px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stepDesc {
+  font-size: 14px;
+  color: #333333;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.detailLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  color: #2563eb;
+  cursor: pointer;
+  text-align: left;
+}
+
+.detailLink:hover {
+  text-decoration: underline;
+}

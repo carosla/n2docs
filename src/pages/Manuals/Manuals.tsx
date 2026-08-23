@@ -4,8 +4,15 @@ import { Search } from 'lucide-react';
 import { Header } from '../../components/Header/Header';
 import { Sidebar } from '../../components/Sidebar/Sidebar';
 import { ManualCard } from '../../components/ManualCard/ManualCard';
+import { ManualDetail } from '../../components/ManualDetail/ManualDetail';
+import type { ManualData } from '../../components/ManualDetail/ManualDetail';
 
-// Manuals.tsx
+// ← ÚNICO import necessário para os passos
+import { allSteps } from '../../data/manuals';
+
+// ======================================================
+// TIPOS
+// ======================================================
 
 type Manual = {
   title: string;
@@ -13,6 +20,7 @@ type Manual = {
   category: string;
   sub: string | null;
   active: boolean;
+  steps?: ManualData['steps'];
 };
 
 // ======================================================
@@ -31,7 +39,6 @@ const cadastrosManuais = {
     'Produto de Grade',
     'Produto de Desossa',
   ],
-
   Auxiliares: [
     'Cadastro de Grupos',
     'Cadastro de SubGrupos',
@@ -51,7 +58,6 @@ const cadastrosManuais = {
     'Configuração Mercado Livre',
     'Cadastro de Equipamentos Grafica',
   ],
-
   Fiscais: [
     'Cadastro Operação Fiscal',
     'Cadastro Mensagem Fiscal',
@@ -63,7 +69,6 @@ const cadastrosManuais = {
     'Cadastro CEST',
     'Cadastro Regra Tributaria',
   ],
-
   Financeiros: [
     'Cadastro Prazo Pagamento',
     'Cadastro Especie Documento',
@@ -76,20 +81,17 @@ const cadastrosManuais = {
     'Cadastro Administradora de Cartões',
     'Cadastro Intermediador Comercial',
   ],
-
   Comerciais: [
     'Grupo de Clientes',
     'Segmento Atuação',
     'Departamento',
     'Rotas',
   ],
-
   Estoque: [
     'Cadastro Unidades Comerciais',
     'Cadastro Tipo de Lançamento',
     'Cadastro Local de Estoque',
   ],
-
   EPI: [
     'Certificado de Aprovação EPI',
     'Produto EPI',
@@ -104,14 +106,6 @@ const cadastrosManuais = {
 // ======================================================
 
 const outrosManuais: Record<string, string[]> = {
-  Agro: [
-    'Cultivo',
-    'Status de Projetos',
-    'Tipo de Projetos',
-    'Fazendas',
-    'Projetos',
-  ],
-
   Estoque: [
     'Entrada de Produto',
     'Entrada de Produtos por Código de Barras',
@@ -125,7 +119,6 @@ const outrosManuais: Record<string, string[]> = {
     'Importar Preço de Custo por Excel',
     'Controle de Entrega de EPI',
   ],
-
   Compras: [
     'Ordem de Compra',
     'Nota de Entrada Manual',
@@ -135,7 +128,6 @@ const outrosManuais: Record<string, string[]> = {
     'Desossa',
     'Controle de Pesagem',
   ],
-
   Vendas: [
     'Pedidos',
     'Pedidos Mod. II',
@@ -151,18 +143,11 @@ const outrosManuais: Record<string, string[]> = {
     'Previsão de Vendas',
     'Separação de Pedidos',
   ],
-
-  Convênio: [
-    'Controle de Fechamento',
-    'Fechamento por Competência',
-  ],
-
   Faturamento: [
     'Nota Fiscal Eletronica',
     'Inutilização de NF-e',
     'Manifesto de Despacho',
   ],
-
   Financeiro: [
     'Titulos a Receber',
     'Baixa de Titulos a Receber',
@@ -173,25 +158,21 @@ const outrosManuais: Record<string, string[]> = {
     'Lançamento Cartões',
     'Baixa de Cartões',
     'Borderô de Desconto',
-
     'Titulos a Pagar',
     'Baixa Titulos a Pagar',
     'Entrada de Titulos',
     'Previsões',
   ],
-
   'Bancos/Cofre': [
     'Lançamentos Bancários',
     'Transf. Constas Bancarias',
     'Conciliação Bancaria',
   ],
-
   Gráfica: [
     'Cadastro Folhas',
     'Cadastro de Custos',
     'Parâmetros de Serviço',
   ],
-
   Química: [
     'Classificação Onu',
     'Grupo de Etapas',
@@ -207,13 +188,11 @@ const outrosManuais: Record<string, string[]> = {
     'Custo de Industrialização',
     'Cadastro de Lote',
   ],
-
   Produção: [
     'Plano Produção',
     'Ordem Produção',
     'Apontamento',
   ],
-
   CRM: [
     'Cadastro Campanhas',
     'Onde Conheceu',
@@ -222,116 +201,83 @@ const outrosManuais: Record<string, string[]> = {
     'Probabilidade de Fechamento',
     'Status Lead',
   ],
-
-  Treinamento: [
-    'Parametrização NFe',
-    'Cadastros NFe',
-    'NFe por Pedido',
-    'NFe Avulsa',
-    'Rejeições NFe',
-  ],
 };
 
 // ======================================================
-// GERA OS MANUAIS DE CADASTROS
+// GERAÇÃO DOS MANUAIS
+// Os passos vêm de allSteps (data/manuals/index.ts).
+// Manuais sem passos cadastrados ficam com steps: [].
 // ======================================================
 
-const manuaisCadastros: Manual[] = Object.entries(
-  cadastrosManuais
-).flatMap(([sub, titles]) =>
-  titles.map((title) => ({
-    title,
-    description: `Manual de ${title.toLowerCase()} no sistema.`,
-    category: 'Cadastros',
-    sub,
-    active: true,
-  }))
+const manuaisCadastros: Manual[] = Object.entries(cadastrosManuais).flatMap(
+  ([sub, titles]) =>
+    titles.map((title) => ({
+      title,
+      description: `Manual de ${title.toLowerCase()} no sistema.`,
+      category: 'Cadastros',
+      sub,
+      active: true,
+      steps: allSteps[title] ?? [],
+    }))
 );
 
-// ======================================================
-// GERA OS DEMAIS MANUAIS
-// ======================================================
-
-const manuaisOutros: Manual[] = Object.entries(
-  outrosManuais
-).flatMap(([category, titles]) =>
-  titles.map((title) => ({
-    title,
-    description: `Manual de ${title.toLowerCase()} no módulo ${category}.`,
-    category,
-    sub: null,
-    active: true,
-  }))
+const manuaisOutros: Manual[] = Object.entries(outrosManuais).flatMap(
+  ([category, titles]) =>
+    titles.map((title) => ({
+      title,
+      description: `Manual de ${title.toLowerCase()} no módulo ${category}.`,
+      category,
+      sub: null,
+      active: true,
+      steps: allSteps[title] ?? [],
+    }))
 );
 
-// ======================================================
-// TODOS OS MANUAIS
-// ======================================================
+const allManuals: Manual[] = [...manuaisCadastros, ...manuaisOutros];
 
-const allManuals: Manual[] = [
-  ...manuaisCadastros,
-  ...manuaisOutros,
-];
+// ======================================================
+// COMPONENTE
+// ======================================================
 
 export function Manuals() {
-  const [selectedCategory, setSelectedCategory] =
-    useState('Todos os manuais');
-
-  const [selectedSub, setSelectedSub] =
-    useState<string | null>(null);
-
+  const [selectedCategory, setSelectedCategory] = useState('Todos os manuais');
+  const [selectedSub, setSelectedSub] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [openManual, setOpenManual] = useState<Manual | null>(null);
 
-  // Filtragem dos manuais
   const filtered = allManuals.filter((manual) => {
-    // Verifica a categoria
     const matchCategory =
       selectedCategory === 'Todos os manuais' ||
       manual.category === selectedCategory;
 
-    // A subcategoria só deve ser considerada
-    // quando a categoria selecionada for "Cadastros".
     const matchSub =
       selectedCategory !== 'Cadastros' ||
       !selectedSub ||
       manual.sub === selectedSub;
 
-    // Verifica a pesquisa
     const matchSearch =
       !search ||
-      manual.title
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      manual.description
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      manual.title.toLowerCase().includes(search.toLowerCase()) ||
+      manual.description.toLowerCase().includes(search.toLowerCase());
 
     return matchCategory && matchSub && matchSearch;
   });
 
-  // A subcategoria só aparece no título quando
-  // a categoria atual é "Cadastros".
   const sectionTitle =
     selectedCategory === 'Cadastros' && selectedSub
       ? `${selectedCategory} — ${selectedSub}`
       : selectedCategory;
 
-  // Seleciona uma categoria
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
-
-    // Ao mudar de categoria, sempre limpa a subcategoria.
     setSelectedSub(null);
+    setOpenManual(null);
   };
 
-  // Seleciona uma subcategoria
   const handleSelectSub = (sub: string) => {
-    // Subcategorias só existem para Cadastros.
-    if (selectedCategory !== 'Cadastros') {
-      return;
-    }
-
+    if (selectedCategory !== 'Cadastros') return;
     setSelectedSub(sub);
+    setOpenManual(null);
   };
 
   return (
@@ -347,50 +293,51 @@ export function Manuals() {
         />
 
         <main className={styles.content}>
-          <section className={styles.hero}>
-            <h1>Manuais do Sistema</h1>
+          {openManual ? (
+            <ManualDetail
+              manual={openManual}
+              onBack={() => setOpenManual(null)}
+            />
+          ) : (
+            <>
+              <section className={styles.hero}>
+                <h1>Manuais do Sistema</h1>
+                <p>Guias passo a passo para cada processo do sistema.</p>
 
-            <p>
-              Guias passo a passo para cada processo do sistema.
-            </p>
+                <div className={styles.searchBox}>
+                  <Search size={18} />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar Manuais..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+              </section>
 
-            <div className={styles.searchBox}>
-              <Search size={18} />
+              <section className={styles.manualsSection}>
+                <h2>{sectionTitle}</h2>
 
-              <input
-                type="text"
-                placeholder="Pesquisar Manuais..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </section>
+                <div className={styles.grid}>
+                  {filtered.map((manual, index) => (
+                    <ManualCard
+                      key={index}
+                      title={manual.title}
+                      description={manual.description}
+                      active={manual.active}
+                      onClick={() => setOpenManual(manual)}
+                    />
+                  ))}
 
-          <section className={styles.manualsSection}>
-            <h2>{sectionTitle}</h2>
-
-            <div className={styles.grid}>
-              {filtered.map((manual, index) => (
-                <ManualCard
-                  key={index}
-                  title={manual.title}
-                  description={manual.description}
-                  active={manual.active}
-                />
-              ))}
-
-              {filtered.length === 0 && (
-                <p
-                  style={{
-                    color: '#999',
-                    fontSize: 14,
-                  }}
-                >
-                  Nenhum manual encontrado.
-                </p>
-              )}
-            </div>
-          </section>
+                  {filtered.length === 0 && (
+                    <p style={{ color: '#999', fontSize: 14 }}>
+                      Nenhum manual encontrado.
+                    </p>
+                  )}
+                </div>
+              </section>
+            </>
+          )}
         </main>
       </div>
     </div>
