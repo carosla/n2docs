@@ -1,5 +1,4 @@
-
-/*Configurações dos cartões*/
+/* Configurações dos cartões */
 .card {
   width: 260px;
   min-height: 180px;
@@ -13,10 +12,31 @@
   align-items: center;
   text-align: center;
 
-  
   padding: 18px 16px;
 
   cursor: pointer;
+
+  /* Base para a animação — sem saltos abruptos */
+  transform: scale(1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.18);
+  transform: scale(1.02);
+}
+
+/* ── Animação de zoom ao clicar ── */
+@keyframes zoomClick {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); box-shadow: 0 8px 28px rgba(37, 99, 235, 0.28); }
+  70%  { transform: scale(0.97); }
+  100% { transform: scale(1.04); opacity: 0.7; }
+}
+
+.zooming {
+  animation: zoomClick 0.3s ease forwards;
+  pointer-events: none; /* evita duplo clique durante a animação */
 }
 
 .icon {

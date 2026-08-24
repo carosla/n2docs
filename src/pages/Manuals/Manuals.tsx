@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom'; 
 import styles from './Manuals.module.css';
 import { Search } from 'lucide-react';
 import { Header } from '../../components/Header/Header';
@@ -266,8 +267,15 @@ const allManuals: Manual[] = [...manuaisCadastros, ...manuaisOutros, ...manuaisR
 // ======================================================
 
 export function Manuals() {
-  const [selectedCategory, setSelectedCategory] = useState('Todos os manuais');
-  const [selectedSub, setSelectedSub] = useState<string | null>(null);
+  const location = useLocation();
+  const locationState = location.state as { category?: string; sub?: string | null } | null;
+
+  const [selectedCategory, setSelectedCategory] = useState(
+    locationState?.category ?? 'Todos os manuais'
+  );
+  const [selectedSub, setSelectedSub] = useState<string | null>(
+    locationState?.sub ?? null
+  );
   const [search, setSearch] = useState('');
   const [openManual, setOpenManual] = useState<Manual | null>(null);
 
@@ -318,6 +326,7 @@ export function Manuals() {
           selectedSub={selectedSub}
           onSelectCategory={handleSelectCategory}
           onSelectSub={handleSelectSub}
+          initialCadastrosOpen={locationState?.category === 'Cadastros'}
         />
 
         <main className={styles.content}>

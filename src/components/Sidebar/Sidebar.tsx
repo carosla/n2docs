@@ -7,6 +7,9 @@ type SidebarProps = {
   selectedSub: string | null;
   onSelectCategory: (cat: string) => void;
   onSelectSub: (sub: string) => void;
+  // Quando a navegação vem da Home com categoria = 'Cadastros',
+  // o submenu já abre automaticamente.
+  initialCadastrosOpen?: boolean;
 };
 
 const categories = [
@@ -21,7 +24,7 @@ const categories = [
   'Gráfica',
   'Química',
   'Produção',
-  'CRM'
+  'CRM',
 ];
 
 const cadastros = [
@@ -49,35 +52,26 @@ export function Sidebar({
   selectedSub,
   onSelectCategory,
   onSelectSub,
+  initialCadastrosOpen = false,
 }: SidebarProps) {
-  const [cadastrosOpen, setCadastrosOpen] = useState(false);
+  // Inicializa já aberto se vier da Home com Cadastros selecionado
+  const [cadastrosOpen, setCadastrosOpen] = useState(initialCadastrosOpen);
 
   // Clique em uma categoria normal
   const handleCategoryClick = (category: string) => {
-    // Fecha o menu de Cadastros ao escolher
-    // qualquer outra categoria.
     setCadastrosOpen(false);
-
-    // Seleciona a categoria.
-    // O componente Manuals vai limpar a subcategoria.
     onSelectCategory(category);
   };
 
   // Clique em Cadastros
   const handleCadastrosClick = () => {
     setCadastrosOpen((previous) => !previous);
-
     onSelectCategory('Cadastros');
   };
 
-  // Clique em uma subcategoria
+  // Clique em subcategoria
   const handleSubClick = (sub: string) => {
-    // Garante que subcategoria só funcione
-    // quando Cadastros estiver selecionado.
-    if (selectedCategory !== 'Cadastros') {
-      return;
-    }
-
+    if (selectedCategory !== 'Cadastros') return;
     onSelectSub(sub);
   };
 
@@ -91,16 +85,14 @@ export function Sidebar({
             <li
               key={category}
               className={
-                selectedCategory === category &&
-                !selectedSub
+                selectedCategory === category && !selectedSub
                   ? styles.active
                   : ''
               }
             >
-              {selectedCategory === category &&
-                !selectedSub && (
-                  <BookOpen size={14} />
-                )}
+              {selectedCategory === category && !selectedSub && (
+                <BookOpen size={14} />
+              )}
 
               {category === 'Cadastros' ? (
                 <>
@@ -109,8 +101,7 @@ export function Sidebar({
                     className={styles.dropdownButton}
                     onClick={handleCadastrosClick}
                   >
-                    Cadastros{' '}
-                    {cadastrosOpen ? '▾' : '▸'}
+                    Cadastros {cadastrosOpen ? '▾' : '▸'}
                   </button>
 
                   {cadastrosOpen && (
@@ -124,9 +115,7 @@ export function Sidebar({
                               ? styles.activeSub
                               : ''
                           }
-                          onClick={() =>
-                            handleSubClick(sub)
-                          }
+                          onClick={() => handleSubClick(sub)}
                         >
                           {sub}
                         </li>
@@ -135,11 +124,7 @@ export function Sidebar({
                   )}
                 </>
               ) : (
-                <span
-                  onClick={() =>
-                    handleCategoryClick(category)
-                  }
-                >
+                <span onClick={() => handleCategoryClick(category)}>
                   {category}
                 </span>
               )}
@@ -156,16 +141,10 @@ export function Sidebar({
             <li
               key={report}
               className={
-                selectedCategory === `Rel-${report}`
-                  ? styles.active
-                  : ''
+                selectedCategory === `Rel-${report}` ? styles.active : ''
               }
               onClick={() => {
-                // Fecha o menu de Cadastros
-                // ao entrar em Relatórios.
                 setCadastrosOpen(false);
-
-                // Seleciona o relatório.
                 onSelectCategory(`Rel-${report}`);
               }}
             >
