@@ -14,24 +14,27 @@
    - [Sidebar](#42-sidebar)
    - [ManualCard](#43-manualcard)
    - [ManualDetail](#44-manualdetail)
-5. [Página principal — Manuals.tsx](#5-página-principal--manualstsx)
-   - [Estado (useState)](#51-estado-usestate)
-   - [Dados dos manuais](#52-dados-dos-manuais)
-   - [Filtragem dinâmica](#53-filtragem-dinâmica)
-   - [Fluxo de navegação](#54-fluxo-de-navegação)
-6. [Camada de dados — src/data/manuals](#6-camada-de-dados--srcdatamanuals)
-   - [types.ts](#61-typests)
-   - [Arquivos de passos](#62-arquivos-de-passos)
-   - [index.ts](#63-indexts)
-7. [Como as peças se conectam](#7-como-as-peças-se-conectam)
-8. [Guias práticos](#8-guias-práticos)
-   - [Adicionar passos a um manual existente](#81-adicionar-passos-a-um-manual-existente)
-   - [Criar um manual novo](#82-criar-um-manual-novo)
-   - [Criar uma categoria nova](#83-criar-uma-categoria-nova)
-   - [Criar um módulo de relatório novo](#84-criar-um-módulo-de-relatório-novo)
-   - [Adicionar ou trocar a cor de uma categoria](#85-adicionar-ou-trocar-a-cor-de-uma-categoria)
-9. [Convenções e regras importantes](#9-convenções-e-regras-importantes)
-10. [Decisões de arquitetura](#10-decisões-de-arquitetura)
+   - [CardOption](#45-cardoption)
+5. [Página Home — Home.tsx](#5-página-home--hometsx)
+6. [Página principal — Manuals.tsx](#6-página-principal--manualstsx)
+   - [Estado (useState e useLocation)](#61-estado-usestate-e-uselocation)
+   - [Dados dos manuais](#62-dados-dos-manuais)
+   - [Filtragem dinâmica](#63-filtragem-dinâmica)
+   - [Fluxo de navegação](#64-fluxo-de-navegação)
+7. [Camada de dados — src/data/manuals](#7-camada-de-dados--srcdatamanuals)
+   - [types.ts](#71-typests)
+   - [Arquivos de passos](#72-arquivos-de-passos)
+   - [index.ts](#73-indexts)
+8. [Como as peças se conectam](#8-como-as-peças-se-conectam)
+9. [Guias práticos](#9-guias-práticos)
+   - [Adicionar passos a um manual existente](#91-adicionar-passos-a-um-manual-existente)
+   - [Criar um manual novo](#92-criar-um-manual-novo)
+   - [Criar uma categoria nova](#93-criar-uma-categoria-nova)
+   - [Criar um módulo de relatório novo](#94-criar-um-módulo-de-relatório-novo)
+   - [Adicionar ou trocar a cor de uma categoria](#95-adicionar-ou-trocar-a-cor-de-uma-categoria)
+   - [Alterar destino dos cards da Home](#96-alterar-destino-dos-cards-da-home)
+10. [Convenções e regras importantes](#10-convenções-e-regras-importantes)
+11. [Decisões de arquitetura](#11-decisões-de-arquitetura)
 
 ---
 
@@ -165,17 +168,20 @@ Menu lateral com duas seções: **Categorias** e **Relatórios**. É um componen
 
 ```ts
 type SidebarProps = {
-  selectedCategory: string;     // categoria atualmente ativa
-  selectedSub: string | null;   // subcategoria de Cadastros ativa (ou null)
-  onSelectCategory: (cat: string) => void;  // chamado ao clicar em categoria
-  onSelectSub: (sub: string) => void;       // chamado ao clicar em subcategoria
+  selectedCategory:     string;              // categoria atualmente ativa
+  selectedSub:          string | null;       // subcategoria de Cadastros ativa (ou null)
+  onSelectCategory:     (cat: string) => void; // chamado ao clicar em categoria
+  onSelectSub:          (sub: string) => void; // chamado ao clicar em subcategoria
+  initialCadastrosOpen?: boolean;            // abre o submenu de Cadastros automaticamente
+                                             // usado quando a navegação vem da Home
 };
 ```
 
 #### Estado interno
 
 ```ts
-const [cadastrosOpen, setCadastrosOpen] = useState(false);
+// Inicializa com initialCadastrosOpen (true quando Card 1 da Home é clicado)
+const [cadastrosOpen, setCadastrosOpen] = useState(initialCadastrosOpen);
 // Controla se o submenu de Cadastros está expandido ou recolhido.
 ```
 
@@ -365,24 +371,143 @@ type ManualDetailProps = {
 
 ---
 
-## 5. Página principal — Manuals.tsx
+### 4.5 CardOption
+
+**Arquivo:** `src/components/CardOption/CardOption.tsx`
+
+Card usado na página Home para apresentar as três áreas de entrada do sistema. Ao clicar, executa uma **animação de zoom** antes de navegar, dando feedback visual ao usuário.
+
+#### Props
+
+```ts
+type CardOptionProps = {
+  icon:        React.ReactNode; // ícone do lucide-react
+  title:       string;          // título do card
+  description: string;          // texto descritivo
+  onClick?:    () => void;       // ação ao clicar (normalmente um navigate)
+};
+```
+
+#### Estado interno
+
+```ts
+const [clicking, setClicking] = useState(false);
+// Controla se a animação de zoom está em execução.
+// Enquanto true, pointer-events é desativado (evita duplo clique).
+```
+
+#### Fluxo do clique com animação
+
+```ts
+const handleClick = () => {
+  if (clicking) return;        // ignora cliques durante a animação
+
+  setClicking(true);           // 1. aplica classe .zooming → inicia animação CSS
+
+  setTimeout(() => {
+    setClicking(false);
+    onClick?.();               // 2. após 300ms navega para o destino
+  }, 300);
+};
+```
+
+O tempo de 300ms coincide com a duração da animação `zoomClick` no CSS, garantindo que a transição termine antes da troca de página.
+
+#### Animação CSS (`CardOption.module.css`)
+
+```css
+@keyframes zoomClick {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); box-shadow: 0 8px 28px rgba(37,99,235,.28); }
+  70%  { transform: scale(0.97); }
+  100% { transform: scale(1.04); opacity: 0.7; }
+}
+
+.zooming {
+  animation: zoomClick 0.3s ease forwards;
+  pointer-events: none; /* bloqueia novos cliques durante a animação */
+}
+```
+
+A sequência — expande → recua levemente → expande levemente e some — imita o toque físico de pressionar e soltar um botão.
+
+**CSS relevante:**
+
+| Classe | O que faz |
+|---|---|
+| `.card` | 260px × 180px, borda azul no topo, sombra suave, `transition` base |
+| `.card:hover` | Sombra azul aumentada, `scale(1.02)` |
+| `.zooming` | Executa `zoomClick` por 300ms e desabilita cliques |
+| `.icon` | Ícone azul `#2563eb`, 24px |
+
+---
+
+## 5. Página Home — Home.tsx
+
+**Arquivo:** `src/pages/Home/Home.tsx`
+
+Página inicial (`/`) com logo, título, descrição e três `<CardOption>`. Cada card navega para `/manuais` passando um **estado de rota** (`location.state`) que diz à página de manuais qual categoria abrir automaticamente.
+
+#### Mapeamento dos cards
+
+| Card | `category` | `sub` | Resultado em Manuals |
+|---|---|---|---|
+| Primeiros Passos | `'Cadastros'` | `'Básicos'` | Abre Cadastros com submenu expandido e filtrado em Básicos |
+| Módulos do Sistema | `'Todos os manuais'` | `null` | Exibe todos os manuais |
+| Relatórios e Consultas | `'Rel-Dashboard'` | `null` | Filtra pelos cards de Dashboard |
+
+#### Como o estado é enviado
+
+```tsx
+// src/pages/Home/Home.tsx
+import { useNavigate } from 'react-router-dom';
+
+const navigate = useNavigate();
+
+// Card 1 — Primeiros Passos
+onClick={() => navigate('/manuais', { state: { category: 'Cadastros', sub: 'Básicos' } })}
+
+// Card 2 — Módulos do Sistema
+onClick={() => navigate('/manuais', { state: { category: 'Todos os manuais', sub: null } })}
+
+// Card 3 — Relatórios e Consultas
+onClick={() => navigate('/manuais', { state: { category: 'Rel-Dashboard', sub: null } })}
+```
+
+O `state` viaja via React Router e fica disponível em `Manuals.tsx` através do hook `useLocation()`. Ele **não aparece na URL** e não persiste após o reload — é descartado quando o usuário sai da página.
+
+---
+
+## 6. Página principal — Manuals.tsx
 
 **Arquivo:** `src/pages/Manuals/Manuals.tsx`
 
 É o componente raiz da funcionalidade de manuais. Ele:
+- Lê o estado da rota vindo da Home (`useLocation`) para abrir a categoria correta
 - Guarda todo o estado de navegação
 - Mantém a lista completa de manuais
 - Filtra os manuais conforme a seleção do usuário
 - Decide o que renderizar: lista de cards ou detalhe de um manual
 
-### 5.1 Estado (useState)
+### 6.1 Estado (useState e useLocation)
+
+O `Manuals.tsx` lê o `location.state` enviado pela `Home.tsx` para inicializar `selectedCategory` e `selectedSub` automaticamente ao montar:
 
 ```ts
-// Categoria selecionada na sidebar. Valor inicial: 'Todos os manuais'
-const [selectedCategory, setSelectedCategory] = useState('Todos os manuais');
+import { useLocation } from 'react-router-dom';
 
-// Subcategoria de Cadastros selecionada. null = nenhuma
-const [selectedSub, setSelectedSub] = useState<string | null>(null);
+const location = useLocation();
+const locationState = location.state as { category?: string; sub?: string | null } | null;
+
+// Se vier da Home com um state, usa esse valor.
+// Caso contrário (acesso direto via URL), começa em 'Todos os manuais'.
+const [selectedCategory, setSelectedCategory] = useState(
+  locationState?.category ?? 'Todos os manuais'
+);
+
+const [selectedSub, setSelectedSub] = useState<string | null>(
+  locationState?.sub ?? null
+);
 
 // Texto da busca
 const [search, setSearch] = useState('');
@@ -391,7 +516,21 @@ const [search, setSearch] = useState('');
 const [openManual, setOpenManual] = useState<Manual | null>(null);
 ```
 
-### 5.2 Dados dos manuais
+O `locationState?.category ?? 'Todos os manuais'` usa o operador `??` (nullish coalescing): se `locationState` for `null` (acesso direto) ou `category` for `undefined`, cai no valor padrão.
+
+A prop `initialCadastrosOpen` é passada para a `Sidebar` para abrir o submenu de Cadastros automaticamente quando o Card 1 da Home for clicado:
+
+```tsx
+<Sidebar
+  selectedCategory={selectedCategory}
+  selectedSub={selectedSub}
+  onSelectCategory={handleSelectCategory}
+  onSelectSub={handleSelectSub}
+  initialCadastrosOpen={locationState?.category === 'Cadastros'}
+/>
+```
+
+### 6.2 Dados dos manuais
 
 Os manuais são definidos em **objetos estáticos** no topo do arquivo e convertidos para o array `allManuals` na inicialização do módulo (fora do componente, então só rodam uma vez).
 
@@ -481,7 +620,7 @@ const allManuals = [...manuaisCadastros, ...manuaisOutros, ...manuaisRelatorios]
 > `allSteps[title] ?? []` — se não existir passos cadastrados para aquele título,
 > o manual é criado com `steps: []` e o detalhe abre sem listar nenhum passo.
 
-### 5.3 Filtragem dinâmica
+### 6.3 Filtragem dinâmica
 
 ```ts
 const filtered = allManuals.filter((manual) => {
@@ -508,16 +647,21 @@ const filtered = allManuals.filter((manual) => {
 
 Os três filtros são aplicados em conjunto. O array `filtered` é recalculado automaticamente pelo React toda vez que `selectedCategory`, `selectedSub` ou `search` mudam.
 
-### 5.4 Fluxo de navegação
+### 6.4 Fluxo de navegação
 
 ```
-Estado inicial
-  selectedCategory = 'Todos os manuais'
-  selectedSub      = null
+[Home.tsx]
+  Usuário clica em CardOption (com animação de zoom)
+       │
+       │  navigate('/manuais', { state: { category, sub } })
+       ▼
+[Manuals.tsx] — monta com useLocation()
+  selectedCategory = locationState.category  (ou 'Todos os manuais')
+  selectedSub      = locationState.sub       (ou null)
   openManual       = null
        │
        ▼
-  [Lista de cards] — todos os manuais
+  [Lista de cards filtrada pela categoria da Home]
        │
        ├── Usuário clica na Sidebar
        │     → handleSelectCategory(cat) ou handleSelectSub(sub)
@@ -529,10 +673,10 @@ Estado inicial
        │     → search atualiza
        │     → filtered é recalculado
        │
-       └── Usuário clica em um card
+       └── Usuário clica em um ManualCard
              → openManual = manual (objeto com title, category, steps, etc.)
              → renderiza <ManualDetail> no lugar da lista
-             → o dot colorido do card usa manual.category para determinar sua cor
+             → dot colorido usa manual.category para determinar a cor
              │
              └── Usuário clica em "← Todos os cadastros"
                    → openManual = null
@@ -541,9 +685,9 @@ Estado inicial
 
 ---
 
-## 6. Camada de dados — src/data/manuals
+## 7. Camada de dados — src/data/manuals
 
-### 6.1 types.ts
+### 7.1 types.ts
 
 Define os tipos TypeScript usados em todos os arquivos de dados.
 
@@ -560,7 +704,7 @@ export type ManualSteps = {
 };
 ```
 
-### 6.2 Arquivos de passos
+### 7.2 Arquivos de passos
 
 Cada arquivo cobre um módulo do sistema e exporta um objeto do tipo `ManualSteps`.
 
@@ -598,7 +742,7 @@ export const xyzSteps: ManualSteps = {
 > espaço, maiúscula) faz com que `allSteps[title]` retorne `undefined`
 > e o manual fique sem passos.
 
-### 6.3 index.ts
+### 7.3 index.ts
 
 Ponto único de saída dos dados. Importa todos os arquivos de passos e os une em um único objeto `allSteps`.
 
@@ -631,21 +775,26 @@ Se duas chaves tiverem o mesmo nome em arquivos diferentes, a última no spread 
 
 ---
 
-## 7. Como as peças se conectam
+## 8. Como as peças se conectam
 
 ```
 main.tsx
   └── <App />
         └── <BrowserRouter>
-              └── /manuais → <Manuals />
+              ├── / → <Home />
+              │         └── <CardOption onClick={() => navigate('/manuais', { state })} />
+              │                   │  animação de zoom (300ms) → navigate com state
+              │                   ▼
+              └── /manuais → <Manuals />  ← lê state via useLocation()
                     │
-                    ├── <Header />                    (sem props)
+                    ├── <Header />                       (sem props)
                     │
-                    ├── <Sidebar                      (componente controlado)
+                    ├── <Sidebar                         (componente controlado)
                     │     selectedCategory={...}
                     │     selectedSub={...}
                     │     onSelectCategory={fn}
                     │     onSelectSub={fn}
+                    │     initialCadastrosOpen={bool}    ← abre submenu automaticamente
                     │   />
                     │
                     └── <main>
@@ -653,7 +802,10 @@ main.tsx
                           ├── [openManual === null]
                           │     ├── campo de busca
                           │     └── {filtered.map(m =>
-                          │             <ManualCard onClick={() => setOpenManual(m)} />
+                          │             <ManualCard
+                          │               category={m.category}
+                          │               onClick={() => setOpenManual(m)}
+                          │             />
                           │           )}
                           │
                           └── [openManual !== null]
@@ -686,9 +838,9 @@ src/data/manuals/
 
 ---
 
-## 8. Guias práticos
+## 9. Guias práticos
 
-### 8.1 Adicionar passos a um manual existente
+### 9.1 Adicionar passos a um manual existente
 
 Abra o arquivo de dados da categoria correspondente e adicione ou edite a entrada:
 
@@ -721,7 +873,7 @@ Pronto. Nenhum outro arquivo precisa ser alterado.
 
 ---
 
-### 8.2 Criar um manual novo
+### 9.2 Criar um manual novo
 
 **Passo 1 — Adicione o título em Manuals.tsx** na categoria correta:
 
@@ -766,7 +918,7 @@ export const cadastrosSteps: ManualSteps = {
 
 ---
 
-### 8.3 Criar uma categoria nova
+### 9.3 Criar uma categoria nova
 
 **Exemplo:** criar a categoria "Agro"
 
@@ -826,7 +978,7 @@ export const allSteps = {
 
 ---
 
-### 8.4 Criar um módulo de relatório novo
+### 9.4 Criar um módulo de relatório novo
 
 **Exemplo:** criar "Rel-Agro" para relatórios agrícolas
 
@@ -872,7 +1024,7 @@ O `index.ts` já importa `relatoriosSteps`, então não precisa de alteração.
 
 ---
 
-### 8.5 Adicionar ou trocar a cor de uma categoria
+### 9.5 Adicionar ou trocar a cor de uma categoria
 
 Todas as cores dos dots ficam centralizadas no objeto `CATEGORY_COLORS`, no topo de `ManualCard.tsx`. É o **único arquivo** que precisa ser editado.
 
@@ -909,7 +1061,42 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 ---
 
-## 9. Convenções e regras importantes
+### 9.6 Alterar destino dos cards da Home
+
+Os três cards da Home estão em `src/pages/Home/Home.tsx`. Para mudar o destino de qualquer um, edite apenas o `state` passado ao `navigate`:
+
+```tsx
+// Exemplo: mudar Card 2 para abrir Financeiro em vez de Todos os manuais
+<CardOption
+  icon={<LayoutGrid />}
+  title="Módulos do Sistema"
+  description="..."
+  onClick={() =>
+    navigate('/manuais', {
+      state: { category: 'Financeiro', sub: null },
+    })
+  }
+/>
+```
+
+**Valores válidos para `category`:**
+
+| Valor | Abre em Manuals |
+|---|---|
+| `'Todos os manuais'` | Exibe todos os cards |
+| `'Cadastros'` | Filtra Cadastros (requer `sub` para subcategoria) |
+| `'Financeiro'` | Filtra módulo Financeiro |
+| `'Estoque'`, `'Compras'`, `'Vendas'`, etc. | Filtra o módulo correspondente |
+| `'Rel-Dashboard'` | Filtra relatórios de Dashboard |
+| `'Rel-Vendas'`, `'Rel-Financeiro'`, etc. | Filtra o relatório correspondente |
+
+**Valores válidos para `sub`** (só quando `category === 'Cadastros'`):
+
+`'Básicos'` · `'Auxiliares'` · `'Fiscais'` · `'Financeiros'` · `'Comerciais'` · `'Estoque'` · `'EPI'`
+
+---
+
+## 10. Convenções e regras importantes
 
 ### Prefixo `Rel-`
 
@@ -961,14 +1148,16 @@ A cor **nunca** é definida no CSS — isso seria impossível, pois é dinâmica
 
 | Componente | Tipo | Razão |
 |---|---|---|
-| `Sidebar` | Controlado | Precisa refletir o estado do pai |
+| `Sidebar` | Controlado | Precisa refletir o estado do pai (`Manuals.tsx`) |
 | `ManualCard` | Controlado | `onClick` e `category` vêm do pai |
 | `ManualDetail` | Controlado | `manual` e `onBack` vêm do pai |
+| `CardOption` | Semi-autônomo | Gerencia internamente o estado de animação (`clicking`), mas o `onClick` final vem do pai (`Home.tsx`) |
 | `Header` | Autônomo | Totalmente estático |
+| `Home` | Autônomo | Só usa `useNavigate` — sem props nem estado externo |
 
 ---
 
-## 10. Decisões de arquitetura
+## 11. Decisões de arquitetura
 
 ### Estado elevado (Lifted State)
 
@@ -985,3 +1174,11 @@ Toda a filtragem (`filtered`) acontece no navegador com `.filter()`. Para a esca
 ### Separação dados/UI
 
 Os passos dos manuais ficam em `src/data/manuals/` separados dos componentes. Isso permite que pessoas não-técnicas possam eventualmente editar os passos (ou que os dados venham de uma API no futuro) sem tocar na lógica de renderização.
+
+### Navegação com estado de rota (`location.state`)
+
+A comunicação entre `Home.tsx` e `Manuals.tsx` usa `navigate(path, { state })` do React Router em vez de query params na URL (`?category=Cadastros`). A vantagem é que o estado não fica exposto na URL e não precisa de parsing/encoding. A desvantagem é que não persiste após reload — mas esse é o comportamento desejado: o usuário sempre começa pelo estado default ao acessar `/manuais` diretamente.
+
+### Animação com setTimeout + CSS
+
+A animação de zoom do `CardOption` usa `setTimeout` para sincronizar o fim da animação CSS (300ms) com a chamada do `navigate`. Isso é intencional: navegar antes da animação terminar causaria um corte visual abrupto. O `pointer-events: none` na classe `.zooming` evita duplo clique durante esse intervalo.
