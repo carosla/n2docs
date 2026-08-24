@@ -6,6 +6,9 @@
 
   padding: 28px 20px;
 
+  /* position relative para o dot ficar ancorado ao card */
+  position: relative;
+
   transition: 0.2s ease;
   cursor: pointer;
 }
@@ -31,4 +34,26 @@
   font-size: 13px;
   line-height: 1.45;
   color: #555555;
+}
+
+/* ── Quadradinho de categoria ── */
+.categoryDot {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+
+  /* a cor vem via style={{ backgroundColor }} no TSX */
+  display: block;
+
+  /* transição suave caso a cor mude */
+  transition: opacity 0.2s ease;
+  opacity: 0.75;
+}
+
+.card:hover .categoryDot {
+  opacity: 1;
 }

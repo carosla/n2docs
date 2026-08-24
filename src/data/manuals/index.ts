@@ -14,10 +14,11 @@
 
 export type { Step, ManualSteps } from './types';
 
-import { cadastrosSteps }        from './cadastros';
-import { financeiroSteps }       from './financeiro';
-import { estoqueSteps }          from './estoque';
+import { cadastrosSteps }            from './cadastros';
+import { financeiroSteps }           from './financeiro';
+import { estoqueSteps }              from './estoque';
 import { comprasSteps, vendasSteps } from './comprasVendas';
+import { relatoriosSteps }           from './relatorios'; // ← NOVO
 
 export const allSteps = {
   ...cadastrosSteps,
@@ -25,4 +26,5 @@ export const allSteps = {
   ...estoqueSteps,
   ...comprasSteps,
   ...vendasSteps,
+  ...relatoriosSteps, // ← NOVO
 };

@@ -233,7 +233,33 @@ const manuaisOutros: Manual[] = Object.entries(outrosManuais).flatMap(
     }))
 );
 
-const allManuals: Manual[] = [...manuaisCadastros, ...manuaisOutros];
+// ======================================================
+// RELATÓRIOS
+// ======================================================
+
+const relatoriosManuais: Record<string, string[]> = {
+  'Rel-Dashboard':     ['Painel Gerencial'],
+  'Rel-Controladoria': ['DRE Gerencial', 'Fluxo de Caixa', 'Resumo Financeiro', 'Extrato de Movimentação de Conta'],
+  'Rel-Vendas':        ['Vendas por Vendedores', 'Vendas por Produtos', 'Vendas por Clientes'],
+  'Rel-Estoque':       ['Posição de Estoque', 'Extrato de movimentação de estoque'],
+  'Rel-Compras':       ['Histórico de Compras'],
+  'Rel-Faturamento':   ['NF-e Emitidas', 'Livro de Registro'],
+  'Rel-Financeiro':    ['Posição Financeira', 'Titulos a receber em aberto/baixados', 'Titulos a pagar em aberto/baixados'],
+};
+
+const manuaisRelatorios: Manual[] = Object.entries(relatoriosManuais).flatMap(
+  ([category, titles]) =>
+    titles.map((title) => ({
+      title,
+      description: `Relatório de ${title.toLowerCase()}.`,
+      category,
+      sub: null,
+      active: true,
+      steps: allSteps[title] ?? [],
+    }))
+);
+
+const allManuals: Manual[] = [...manuaisCadastros, ...manuaisOutros, ...manuaisRelatorios];
 
 // ======================================================
 // COMPONENTE
@@ -266,6 +292,8 @@ export function Manuals() {
   const sectionTitle =
     selectedCategory === 'Cadastros' && selectedSub
       ? `${selectedCategory} — ${selectedSub}`
+      : selectedCategory.startsWith('Rel-')
+      ? `Relatório — ${selectedCategory.replace('Rel-', '')}`
       : selectedCategory;
 
   const handleSelectCategory = (category: string) => {
@@ -325,6 +353,7 @@ export function Manuals() {
                       title={manual.title}
                       description={manual.description}
                       active={manual.active}
+                      category={manual.category}
                       onClick={() => setOpenManual(manual)}
                     />
                   ))}
